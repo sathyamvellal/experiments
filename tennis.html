@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<head>
+  <title>Tennis Game</title>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+  <script type="text/javascript">
+  var canvas;
+  var canvasContext;
+  var framesPerSecond = 30;
+
+  var ballX = 50;
+  var ballY = 100;
+  var ballSpeed = 15;
+  var ballXDirection = 1; // Right = 1; Left = -1
+  var ballYDirection = 1; // Down = 1; Up = -1
+  var ballRadius = 5;
+
+  var LeftPaddleWidth = 10;
+  var LeftPaddleHeight = 100
+  var LeftPaddleX = 5;
+  var LeftPaddleY = 200;
+
+  function init() {
+    canvas = document.getElementById('gameCanvas');
+    canvasContext = canvas.getContext('2d');
+
+    setInterval(function() {
+      moveEverything();
+      drawEverything();
+    }, 1000/framesPerSecond);
+
+    canvas.addEventListener('mousemove', function(e) {
+      var mousePosition = getMousePosition(e);
+      LeftPaddleY = mousePosition.y - (LeftPaddleHeight / 2);
+    });
+
+    resetBall();
+  }
+
+  function moveEverything() {
+    var ballNextX = ballX + (ballRadius + ballSpeed) * ballXDirection;
+    var ballNextY = ballY + (ballRadius + ballSpeed) * ballYDirection;
+
+    if (ballNextX > canvas.width) {
+      ballXDirection = -ballXDirection;
+    }
+    if (ballNextX < 0) {
+      if (ballNextY < LeftPaddleY || ballNextY > (LeftPaddleY + LeftPaddleHeight)) {
+        resetBall();
+      } else {
+        ballXDirection = -ballXDirection;
+      }
+    }
+    ballX = ballX + (ballSpeed * ballXDirection);
+
+    if (ballNextY > canvas.height || ballNextY < 0) {
+      ballYDirection = -ballYDirection;
+    }
+    ballY = ballY + (ballSpeed * ballYDirection);
+  }
+
+  function drawEverything() {
+    // Draw background
+    drawRect(0, 0, canvas.width, canvas.height, 'black');
+
+    // Draw Left Paddle
+    drawRect(LeftPaddleX, LeftPaddleY, LeftPaddleWidth, LeftPaddleHeight, 'white');
+
+    // Draw Ball
+    drawCircle(ballX, ballY, ballRadius, 'white');
+  }
+
+  function drawRect(x, y, width, height, color) {
+    canvasContext.fillStyle = color;
+    canvasContext.fillRect(x, y, width, height);
+  }
+
+  function drawCircle(x, y, r, color) {
+    canvasContext.fillStyle = color;
+    canvasContext.strokeStyle = color;
+    canvasContext.beginPath();
+    canvasContext.arc(x, y, r, 0, Math.PI * 2, true);
+    canvasContext.stroke();
+    canvasContext.fill();
+  }
+
+  function getMousePosition(e) {
+    var rect = canvas.getBoundingClientRect();
+    var root = document.documentElement;
+    var x = e.clientX - rect.left - root.scrollLeft;
+    var y = e.clientY - rect.top - root.scrollTop;
+    return {
+      x: x,
+      y: y
+    }
+  }
+
+  function resetBall() {
+    ballX = canvas.width / 2;
+    ballY = canvas.height / 2;
+  }
+
+  window.onload = init;
+  </script>
+</body>
+</html>
